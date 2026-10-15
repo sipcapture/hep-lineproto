@@ -7,6 +7,10 @@
 
 import hepjs from 'hep-js';
 import { getSIP } from 'parsip';
+import {
+  escapeLineProtocolFieldValue,
+  escapeLineProtocolKeyOrTagValue,
+} from './hep-line-protocol-escape.js';
 
 class HepToLineProtocolConverter {
   constructor() {
@@ -213,7 +217,7 @@ class HepToLineProtocolConverter {
     };
     
     if (payload) {
-      fields.payload = payload.replace(/\r\n|\n|\r/g, '\\r\\n');
+      fields.payload = payload;
       fields.payload_size = payload.length;
     }
 
@@ -293,7 +297,7 @@ class HepToLineProtocolConverter {
    */
   escapeKey(key) {
     if (typeof key !== 'string') return key;
-    return key.replace(/[ ,=]/g, '\\$&');
+    return escapeLineProtocolKeyOrTagValue(key);
   }
 
   /**
@@ -303,20 +307,16 @@ class HepToLineProtocolConverter {
    */
   escapeTagValue(value) {
     if (value === null || value === undefined) return '';
-    return String(value).replace(/[ ,=]/g, '\\$&');
+    return escapeLineProtocolKeyOrTagValue(String(value));
   }
 
   /**
-   * Escape special characters in field values
+   * Escape special characters in quoted string field values
    * @param {string} value - Field value to escape
    * @returns {string} Escaped field value
    */
   escapeFieldValue(value) {
-    if (value === null || value === undefined) return '';
-    // Replace newlines with \r\n and escape quotes and backslashes
-    return String(value)
-      .replace(/\r\n|\n|\r/g, '\\r\\n')
-      .replace(/["\\]/g, '\\$&');
+    return escapeLineProtocolFieldValue(value);
   }
 }
 
